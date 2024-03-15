@@ -14,6 +14,6 @@ public class UserController {
 
     @GetMapping("user/{id}")
     public User getUserById() {
-        return userService.getUserById(4L);
+        return userService.getUserById(1L);
     }
 }
