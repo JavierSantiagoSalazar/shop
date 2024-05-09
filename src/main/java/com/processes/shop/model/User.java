@@ -2,16 +2,19 @@ package com.processes.shop.model;
 
 import com.processes.shop.model.enums.IdentificationType;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
 @Data
-@Builder
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,5 +28,7 @@ public class User {
     @Column(name = "phone_number")
     private String phoneNumber;
     private String email;
-    //private List<Address> address;
+
+    @OneToMany(mappedBy = "user")
+    private List<Address> address;
 }

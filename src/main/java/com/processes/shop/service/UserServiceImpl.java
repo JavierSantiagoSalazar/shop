@@ -1,6 +1,9 @@
 package com.processes.shop.service;
 
+import com.processes.shop.exceptions.AlreadyExistsException;
+import com.processes.shop.exceptions.NotFoundException;
 import com.processes.shop.model.User;
+import com.processes.shop.model.enums.ErrorMessages;
 import com.processes.shop.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,28 +19,42 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createUser(User user) {
+        Optional<User> userFindByEmail = userRepository.findByEmail(user.getEmail());
+        if (userFindByEmail.isPresent()){
+            throw new AlreadyExistsException(ErrorMessages.USER_EMAIL_EXISTS.getMessage());
+        }
         return userRepository.save(user);
     }
 
     @Override
-    public User updateUser(User updatedUser, Long id) {
+    public User updateUser(User userUpdated, Long id) {
+
         Optional<User> userDb = userRepository.findById(id);
         if (userDb.isEmpty()){
-            return null;
+            throw new NotFoundException(ErrorMessages.USER_NOT_FOUND.getMessage());
         }
-        userDb.get().setFullName(updatedUser.getFullName());
-        userDb.get().setPhoneNumber(updatedUser.getPhoneNumber());
+        Optional<User> userFindByEmail = userRepository.findByEmailAndIdNot(userUpdated.getEmail(), id);
+        if (userFindByEmail.isPresent()){
+            throw new AlreadyExistsException(ErrorMessages.USER_EMAIL_EXISTS.getMessage());
+        }
+        userDb.get().setFullName(userUpdated.getFullName());
+        userDb.get().setPhoneNumber(userUpdated.getPhoneNumber());
+        userDb.get().setEmail(userUpdated.getEmail());
         return userRepository.save(userDb.get());
     }
 
     @Override
     public User getUserById(Long id) {
         Optional<User> user = userRepository.findById(id);
-        return user.orElse(null);
+        if (user.isEmpty()){
+            throw new NotFoundException(ErrorMessages.USER_NOT_FOUND.getMessage());
+        }
+        return user.get();
     }
 
     @Override
     public List<User> getUsers() {
         return (List<User>) userRepository.findAll();
     }
+
 }
